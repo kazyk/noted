@@ -51,7 +51,7 @@ class NoteItemsViewController: NSViewController, NSCollectionViewDelegateFlowLay
     
     func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> NSSize {
         guard let item = collectionView.item(at: indexPath) as? NoteViewItem else {
-            return CGSize(width: collectionView.frame.width, height: 52)
+            return CGSize(width: collectionView.frame.width, height: 95)
         }
         return CGSize(width: collectionView.frame.width, height: item.itemHeight())
     }

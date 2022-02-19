@@ -9,23 +9,28 @@ import AppKit
 import Combine
 import Carbon
 
-private let inset: CGFloat = 8
-
 class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
+    @IBOutlet private var label: NSTextField!
+    @IBOutlet private var textViewPlaceholder: NSView!
+    
     private var textView: TextView!
     private var defaultHeight: CGFloat = 0
+    private var defaultVerticalMargin: CGFloat = 0
+    private var top: CGFloat = 0
+    private var bottom: CGFloat = 0
     
     private var id: NoteItem.ID?
     private var cancellable: [AnyCancellable] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        textView = TextView(frame: self.view.bounds.insetBy(dx: inset, dy: inset))
+        textView = TextView(frame: self.textViewPlaceholder.bounds)
         textView.setAccessibilityIdentifier("NoteViewItemTextView")
         textView.autoresizingMask = [.width] // including .height breaks layout
-        view.addSubview(textView)
+        textViewPlaceholder.addSubview(textView)
         textView.delegate = self
         defaultHeight = textView.frame.height
+        defaultVerticalMargin = view.frame.height - textView.frame.height
     }
 
     override func prepareForReuse() {
@@ -39,6 +44,7 @@ class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
         let textView = self.textView!
         id = noteItem.id
         textView.string = noteItem.text
+        label.stringValue = "#\(noteItem.id)"
         
         nc.publisher(for: NSText.didChangeNotification, object: textView)
             .sink { _ in
@@ -64,7 +70,7 @@ class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
     }
     
     func itemHeight() -> CGFloat {
-        return max(defaultHeight, textView.frame.height) + inset * 2
+        return max(defaultHeight, textView.frame.height) + defaultVerticalMargin
     }
     
     func textView(_ textView: NSTextView, shouldChangeTextIn affectedCharRange: NSRange, replacementString: String?) -> Bool {
@@ -89,7 +95,7 @@ class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
         super.apply(layoutAttributes)
         
         // somehow origin is not kept after layout
-        textView.frame.origin.y = inset
+        textView.frame.origin.y = 0
     }
     
     private class TextView: NSTextView {

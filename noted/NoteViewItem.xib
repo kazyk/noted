@@ -10,12 +10,39 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <collectionViewItem id="Xwd-5R-3XA" customClass="NoteViewItem" customModule="noted" customModuleProvider="target">
             <connections>
+                <outlet property="label" destination="TIK-vG-mts" id="9tC-Zo-IFk"/>
+                <outlet property="textViewPlaceholder" destination="qkU-SZ-FW0" id="3ud-Cl-xst"/>
                 <outlet property="view" destination="Ld0-9y-HtZ" id="1kQ-jr-DZ8"/>
             </connections>
         </collectionViewItem>
         <customView translatesAutoresizingMaskIntoConstraints="NO" id="Ld0-9y-HtZ">
-            <rect key="frame" x="0.0" y="0.0" width="308" height="52"/>
-            <point key="canvasLocation" x="211" y="62"/>
+            <rect key="frame" x="0.0" y="0.0" width="308" height="95"/>
+            <subviews>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="TIK-vG-mts">
+                    <rect key="frame" x="6" y="73" width="37" height="16"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="16" id="JAa-l0-SY6"/>
+                    </constraints>
+                    <textFieldCell key="cell" lineBreakMode="clipping" title="Label" id="bZ6-ia-lkt">
+                        <font key="font" usesAppearanceFont="YES"/>
+                        <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="qkU-SZ-FW0">
+                    <rect key="frame" x="6" y="8" width="296" height="59"/>
+                </customView>
+            </subviews>
+            <constraints>
+                <constraint firstItem="qkU-SZ-FW0" firstAttribute="top" secondItem="TIK-vG-mts" secondAttribute="bottom" constant="6" id="2wn-67-SK9"/>
+                <constraint firstAttribute="trailing" secondItem="qkU-SZ-FW0" secondAttribute="trailing" constant="6" id="4TD-zc-e2x"/>
+                <constraint firstAttribute="bottom" secondItem="qkU-SZ-FW0" secondAttribute="bottom" constant="8" id="Ulp-jw-5hW"/>
+                <constraint firstItem="TIK-vG-mts" firstAttribute="top" secondItem="Ld0-9y-HtZ" secondAttribute="top" constant="6" id="a4F-CL-gqF"/>
+                <constraint firstItem="qkU-SZ-FW0" firstAttribute="leading" secondItem="Ld0-9y-HtZ" secondAttribute="leading" constant="6" id="cv2-xB-2zo"/>
+                <constraint firstItem="qkU-SZ-FW0" firstAttribute="top" secondItem="TIK-vG-mts" secondAttribute="bottom" constant="6" id="njJ-iR-uBz"/>
+                <constraint firstItem="TIK-vG-mts" firstAttribute="leading" secondItem="Ld0-9y-HtZ" secondAttribute="leading" constant="8" id="wef-Ro-7r3"/>
+            </constraints>
+            <point key="canvasLocation" x="211" y="83.5"/>
         </customView>
     </objects>
 </document>

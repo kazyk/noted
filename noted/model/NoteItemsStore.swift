@@ -24,13 +24,13 @@ class NoteItemsStore: Codable {
     }
     
     @Published private var noteItems = OrderedDict<NoteItem>()
-    @Published private var focusId = 0
-    private var nextId = 1
+    @Published private var focusId = 1
+    private var nextId = 2
     
     private var cancellable: [AnyCancellable] = []
     
     init() {
-        noteItems[0] = NoteItem(id: 0, text: "", isPlaceholder: true)
+        noteItems[0] = NoteItem(id: 1, text: "", isPlaceholder: true)
     }
 
     func noteItem(id: NoteItem.ID) -> NoteItem? {
@@ -68,6 +68,8 @@ class NoteItemsStore: Codable {
             }
             if let prevId = noteItems.previousId(of: id) {
                 focusId = prevId
+            } else if id == noteItems.allIds[0], noteItems.allIds.count > 1 {
+                focusId = noteItems.allIds[1]
             }
             if !item.isPlaceholder {
                 noteItems.remove(id: id)
