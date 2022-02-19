@@ -37,7 +37,7 @@ class NoteItemsStore: Codable {
         return noteItems[id]
     }
     
-    func shouldFocusAt(id: NoteItem.ID) -> AnyPublisher<Bool, Never> {
+    func focusAt(id: NoteItem.ID) -> AnyPublisher<Bool, Never> {
         makePublisher {
             $focusId.map { $0 == id }
         }

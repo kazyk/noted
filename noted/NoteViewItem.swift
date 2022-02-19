@@ -32,7 +32,6 @@ class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
         super.prepareForReuse()
         id = nil
         cancellable = []
-        textView.deleteKeyListener = nil
     }
     
     func update(noteItem: NoteItem, shouldFocus: AnyPublisher<Bool, Never>) {
@@ -55,11 +54,13 @@ class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
             }
             .store(in: &cancellable)
         
-        textView.deleteKeyListener = { textView in
-            if textView.string == "" {
-                stores().noteItemsStore.dispatch(.remove(id: noteItem.id))
+        textView.deleteKeyDown
+            .sink {
+                if textView.string == "" {
+                    stores().noteItemsStore.dispatch(.remove(id: noteItem.id))
+                }
             }
-        }
+            .store(in: &cancellable)
     }
     
     func itemHeight() -> CGFloat {
@@ -92,11 +93,11 @@ class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
     }
     
     private class TextView: NSTextView {
-        var deleteKeyListener: ((TextView) -> Void)?
+        let deleteKeyDown = PassthroughSubject<(), Never>()
         
         override func keyDown(with event: NSEvent) {
             if event.keyCode == kVK_Delete {
-               deleteKeyListener?(self)
+                deleteKeyDown.send()
             }
             
             super.keyDown(with: event)

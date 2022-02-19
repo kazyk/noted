@@ -37,7 +37,7 @@ class NoteItemStoreTest: XCTestCase {
         let store = NoteItemsStore()
         
         let ids = getFirst(store.allIds())
-        let focus = getFirst(store.shouldFocusAt(id: ids[0]))
+        let focus = getFirst(store.focusAt(id: ids[0]))
         XCTAssertTrue(focus)
     }
     
@@ -64,7 +64,7 @@ class NoteItemStoreTest: XCTestCase {
         XCTAssertEqual(item?.text, "")
         XCTAssertEqual(item?.isPlaceholder, true)
         
-        let focus = getFirst(store.shouldFocusAt(id: ids[1]))
+        let focus = getFirst(store.focusAt(id: ids[1]))
         XCTAssertTrue(focus)
     }
     
@@ -86,7 +86,7 @@ class NoteItemStoreTest: XCTestCase {
         let item = store.noteItem(id: newIds[0])
         XCTAssertEqual(item?.isPlaceholder, true)
         
-        let focus = getFirst(store.shouldFocusAt(id: newIds[0]))
+        let focus = getFirst(store.focusAt(id: newIds[0]))
         XCTAssertTrue(focus)
     }
     
