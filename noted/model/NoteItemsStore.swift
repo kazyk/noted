@@ -42,16 +42,10 @@ class NoteItemsStore: Codable {
         makePublisher {
             $noteItems
                 .filter { items in items[id] != nil }
-                .combineLatest(focusAt(id: id))
+                .combineLatest($focusId.map { $0 == id })
                 .map { (items, focus) in
                     NoteItemState(item: items[id]!, focus: focus)
                 }
-        }
-    }
-    
-    func focusAt(id: NoteItem.ID) -> AnyPublisher<Bool, Never> {
-        makePublisher {
-            $focusId.map { $0 == id }
         }
     }
     

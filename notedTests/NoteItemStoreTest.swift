@@ -36,8 +36,8 @@ class NoteItemStoreTest: XCTestCase {
         let store = NoteItemsStore()
         
         let ids = getFirst(store.allIds())
-        let focus = getFirst(store.focusAt(id: ids[0]))
-        XCTAssertTrue(focus)
+        let state = getFirst(store.itemState(id: ids[0]))
+        XCTAssertTrue(state.focus)
     }
     
     func testEditItem() throws {
@@ -62,9 +62,7 @@ class NoteItemStoreTest: XCTestCase {
         let state = getFirst(store.itemState(id: ids[1]))
         XCTAssertEqual(state.item.text, "")
         XCTAssertEqual(state.item.isPlaceholder, true)
-        
-        let focus = getFirst(store.focusAt(id: ids[1]))
-        XCTAssertTrue(focus)
+        XCTAssertTrue(state.focus)
     }
     
     func testRemoveItem() {
@@ -84,9 +82,7 @@ class NoteItemStoreTest: XCTestCase {
         
         let state = getFirst(store.itemState(id: newIds[0]))
         XCTAssertEqual(state.item.isPlaceholder, true)
-        
-        let focus = getFirst(store.focusAt(id: newIds[0]))
-        XCTAssertTrue(focus)
+        XCTAssertTrue(state.focus)
     }
     
     private func getFirst<P: Publisher>(_ publisher: P) -> P.Output {
