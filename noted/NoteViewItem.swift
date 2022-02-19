@@ -16,10 +16,7 @@ class NoteViewItem: NSCollectionViewItem {
     private var textView: TextView!
     private var defaultHeight: CGFloat = 0
     private var defaultVerticalMargin: CGFloat = 0
-    private var top: CGFloat = 0
-    private var bottom: CGFloat = 0
     
-    private var id: NoteItem.ID?
     private var cancellable: [AnyCancellable] = []
     
     override func viewDidLoad() {
@@ -34,7 +31,6 @@ class NoteViewItem: NSCollectionViewItem {
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        id = nil
         cancellable = []
     }
     
@@ -43,19 +39,19 @@ class NoteViewItem: NSCollectionViewItem {
         let nc = NotificationCenter.default
         let textView = self.textView!
         let label = self.label!
-        self.id = id
         let itemState = store.itemState(id: id)
         
         itemState
             .map { state in state.item.text }
             .first()
-            .sink { textView.string = $0 }
+            .assign(to: \.string, on: textView)
             .store(in: &cancellable)
         
         itemState
-            .sink { state in
-                label.stringValue = state.item.isPlaceholder ? "New Item" : "#\(id)"
+            .map { state in
+                state.item.isPlaceholder ? "New Item" : "#\(id)"
             }
+            .assign(to: \.stringValue, on: label)
             .store(in: &cancellable)
         
         itemState
