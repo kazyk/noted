@@ -26,7 +26,7 @@ class NoteItemStoreTest: XCTestCase {
         
         let ids = getFirst(store.allIds())
         XCTAssertEqual(ids.count, 1)
-        let state = getFirst(store.noteItem(id: ids[0]))
+        let state = getFirst(store.itemState(id: ids[0]))
         
         XCTAssertEqual(state.item.isPlaceholder, true)
         XCTAssertEqual(state.item.text, "")
@@ -45,7 +45,7 @@ class NoteItemStoreTest: XCTestCase {
         
         let ids = getFirst(store.allIds())
         store.dispatch(.edit(id: ids[0], text: "test text"))
-        let state = getFirst(store.noteItem(id: ids[0]))
+        let state = getFirst(store.itemState(id: ids[0]))
         XCTAssertEqual(state.item.text, "test text")
     }
     
@@ -59,7 +59,7 @@ class NoteItemStoreTest: XCTestCase {
         ids = getFirst(store.allIds())
         XCTAssertEqual(ids.count, 2)
         
-        let state = getFirst(store.noteItem(id: ids[1]))
+        let state = getFirst(store.itemState(id: ids[1]))
         XCTAssertEqual(state.item.text, "")
         XCTAssertEqual(state.item.isPlaceholder, true)
         
@@ -82,7 +82,7 @@ class NoteItemStoreTest: XCTestCase {
         XCTAssertEqual(newIds.count, 1)
         XCTAssertEqual(newIds[0], ids[1])
         
-        let state = getFirst(store.noteItem(id: newIds[0]))
+        let state = getFirst(store.itemState(id: newIds[0]))
         XCTAssertEqual(state.item.isPlaceholder, true)
         
         let focus = getFirst(store.focusAt(id: newIds[0]))

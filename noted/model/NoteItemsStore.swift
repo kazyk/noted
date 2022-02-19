@@ -38,7 +38,7 @@ class NoteItemsStore: Codable {
         noteItems.append(NoteItem(id: 1, text: "", isPlaceholder: true))
     }
     
-    func noteItem(id: NoteItem.ID) -> AnyPublisher<NoteItemState, Never> {
+    func itemState(id: NoteItem.ID) -> AnyPublisher<NoteItemState, Never> {
         makePublisher {
             $noteItems
                 .filter { items in items[id] != nil }

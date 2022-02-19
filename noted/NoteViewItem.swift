@@ -9,7 +9,7 @@ import AppKit
 import Combine
 import Carbon
 
-class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
+class NoteViewItem: NSCollectionViewItem {
     @IBOutlet private var label: NSTextField!
     @IBOutlet private var textViewPlaceholder: NSView!
     
@@ -28,7 +28,6 @@ class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
         textView.setAccessibilityIdentifier("NoteViewItemTextView")
         textView.autoresizingMask = [.width] // including .height breaks layout
         textViewPlaceholder.addSubview(textView)
-        textView.delegate = self
         defaultHeight = textView.frame.height
         defaultVerticalMargin = view.frame.height - textView.frame.height
     }
@@ -39,25 +38,27 @@ class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
         cancellable = []
     }
     
-    func update(id: NoteItem.ID, noteItem: AnyPublisher<NoteItemState, Never>) {
+    func update(id: NoteItem.ID) {
+        let store = stores().noteItemsStore
         let nc = NotificationCenter.default
         let textView = self.textView!
         let label = self.label!
         self.id = id
+        let itemState = store.itemState(id: id)
         
-        noteItem
+        itemState
             .map { state in state.item.text }
             .first()
             .sink { textView.string = $0 }
             .store(in: &cancellable)
         
-        noteItem
+        itemState
             .sink { state in
                 label.stringValue = state.item.isPlaceholder ? "New Item" : "#\(id)"
             }
             .store(in: &cancellable)
         
-        noteItem
+        itemState
             .map { state in state.focus }
             .sink { [unowned self] focus in
                 if focus {
@@ -67,16 +68,23 @@ class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
             .store(in: &cancellable)
         
         nc.publisher(for: NSText.didChangeNotification, object: textView)
-            .sink { _ in
-                stores().noteItemsStore.dispatch(.edit(id: id, text: textView.string))
+            .sink { [unowned self] _ in
+                store.dispatch(.edit(id: id, text: textView.string))
+                self.needsLayout()
             }
             .store(in: &cancellable)
         
         textView.deleteKeyDown
             .sink {
                 if textView.string == "" {
-                    stores().noteItemsStore.dispatch(.remove(id: id))
+                    store.dispatch(.remove(id: id))
                 }
+            }
+            .store(in: &cancellable)
+        
+        textView.shiftEnter
+            .sink {
+                store.dispatch(.goNext(id: id))
             }
             .store(in: &cancellable)
     }
@@ -85,16 +93,7 @@ class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
         return max(defaultHeight, textView.frame.height) + defaultVerticalMargin
     }
     
-    func textView(_ textView: NSTextView, shouldChangeTextIn affectedCharRange: NSRange, replacementString: String?) -> Bool {
-        if replacementString == "\n" && NSEvent.modifierFlags.contains(.shift) {
-            stores().noteItemsStore.dispatch(.goNext(id: id!))
-            return false
-        }
-
-        return true
-    }
-    
-    func textDidChange(_ notification: Notification) {
+    private func needsLayout() {
         if let collectionView = self.collectionView {
             let context = NSCollectionViewFlowLayoutInvalidationContext()
             let indexPath = collectionView.indexPath(for: self)!
@@ -110,8 +109,23 @@ class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
         textView.frame.origin.y = 0
     }
     
-    private class TextView: NSTextView {
+    private class TextView: NSTextView, NSTextViewDelegate {
         let deleteKeyDown = PassthroughSubject<(), Never>()
+        let shiftEnter = PassthroughSubject<(), Never>()
+        
+        override init(frame frameRect: NSRect, textContainer container: NSTextContainer?) {
+            super.init(frame: frameRect, textContainer: container)
+            delegate = self
+        }
+        
+        override init(frame frameRect: NSRect) {
+            super.init(frame: frameRect)
+            delegate = self
+        }
+        
+        required init?(coder: NSCoder) {
+            super.init(coder: coder)
+        }
         
         override func keyDown(with event: NSEvent) {
             if event.keyCode == kVK_Delete {
@@ -119,6 +133,15 @@ class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
             }
             
             super.keyDown(with: event)
+        }
+        
+        func textView(_ textView: NSTextView, shouldChangeTextIn affectedCharRange: NSRange, replacementString: String?) -> Bool {
+            if replacementString == "\n" && NSEvent.modifierFlags.contains(.shift) {
+                shiftEnter.send()
+                return false
+            }
+
+            return true
         }
     }
 }
