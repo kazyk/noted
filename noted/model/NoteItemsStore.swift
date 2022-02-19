@@ -9,11 +9,16 @@ import Foundation
 import Combine
 import AppKit
 
-struct NoteItem: Identifiable, Codable {
+struct NoteItem: Identifiable, Codable, Equatable {
     typealias ID = Int
     var id: ID
     var text: String
     var isPlaceholder: Bool
+}
+
+struct NoteItemState: Equatable {
+    var item: NoteItem
+    var focus: Bool
 }
 
 class NoteItemsStore: Codable {
@@ -30,11 +35,18 @@ class NoteItemsStore: Codable {
     private var cancellable: [AnyCancellable] = []
     
     init() {
-        noteItems[0] = NoteItem(id: 1, text: "", isPlaceholder: true)
+        noteItems.append(NoteItem(id: 1, text: "", isPlaceholder: true))
     }
-
-    func noteItem(id: NoteItem.ID) -> NoteItem? {
-        return noteItems[id]
+    
+    func noteItem(id: NoteItem.ID) -> AnyPublisher<NoteItemState, Never> {
+        makePublisher {
+            $noteItems
+                .filter { items in items[id] != nil }
+                .combineLatest(focusAt(id: id))
+                .map { (items, focus) in
+                    NoteItemState(item: items[id]!, focus: focus)
+                }
+        }
     }
     
     func focusAt(id: NoteItem.ID) -> AnyPublisher<Bool, Never> {

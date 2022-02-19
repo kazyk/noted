@@ -26,7 +26,7 @@ class NoteItemsViewController: NSViewController, NSCollectionViewDelegateFlowLay
             collectionView: collectionView,
             itemProvider: { collectionView, indexPath, identifier in
                 let item = collectionView.makeItem(withIdentifier: .init("cell"), for: indexPath) as! NoteViewItem
-                item.update(noteItem: store.noteItem(id: identifier)!, shouldFocus: store.focusAt(id: identifier))
+                item.update(id: identifier, noteItem: store.noteItem(id: identifier))
                 return item
             })
         collectionView.dataSource = dataSource

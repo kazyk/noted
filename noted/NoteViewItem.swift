@@ -39,20 +39,26 @@ class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
         cancellable = []
     }
     
-    func update(noteItem: NoteItem, shouldFocus: AnyPublisher<Bool, Never>) {
+    func update(id: NoteItem.ID, noteItem: AnyPublisher<NoteItemState, Never>) {
         let nc = NotificationCenter.default
         let textView = self.textView!
-        id = noteItem.id
-        textView.string = noteItem.text
-        label.stringValue = "#\(noteItem.id)"
+        let label = self.label!
+        self.id = id
         
-        nc.publisher(for: NSText.didChangeNotification, object: textView)
-            .sink { _ in
-                stores().noteItemsStore.dispatch(.edit(id: noteItem.id, text: textView.string))
+        noteItem
+            .map { state in state.item.text }
+            .first()
+            .sink { textView.string = $0 }
+            .store(in: &cancellable)
+        
+        noteItem
+            .sink { state in
+                label.stringValue = state.item.isPlaceholder ? "New Item" : "#\(id)"
             }
             .store(in: &cancellable)
         
-        shouldFocus
+        noteItem
+            .map { state in state.focus }
             .sink { [unowned self] focus in
                 if focus {
                     self.view.window?.makeFirstResponder(textView)
@@ -60,10 +66,16 @@ class NoteViewItem: NSCollectionViewItem, NSTextViewDelegate {
             }
             .store(in: &cancellable)
         
+        nc.publisher(for: NSText.didChangeNotification, object: textView)
+            .sink { _ in
+                stores().noteItemsStore.dispatch(.edit(id: id, text: textView.string))
+            }
+            .store(in: &cancellable)
+        
         textView.deleteKeyDown
             .sink {
                 if textView.string == "" {
-                    stores().noteItemsStore.dispatch(.remove(id: noteItem.id))
+                    stores().noteItemsStore.dispatch(.remove(id: id))
                 }
             }
             .store(in: &cancellable)
