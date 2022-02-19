@@ -41,17 +41,17 @@ class NoteViewItem: NSCollectionViewItem {
         let label = self.label!
         let itemState = store.itemState(id: id)
         
-        itemState
+        let initialText = itemState
             .map { state in state.item.text }
             .first()
-            .assign(to: \.string, on: textView)
+        initialText.assign(to: \.string, on: textView)
             .store(in: &cancellable)
         
-        itemState
+        let labelText = itemState
             .map { state in
                 state.item.isPlaceholder ? "New Item" : "#\(id)"
             }
-            .assign(to: \.stringValue, on: label)
+        labelText.assign(to: \.stringValue, on: label)
             .store(in: &cancellable)
         
         itemState
